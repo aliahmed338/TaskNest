@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
+import { useRegisterMutation } from "../../store/api/authApi";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -20,6 +21,7 @@ export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const [Register, { isLoading }] = useRegisterMutation();
   const {
     handleSubmit,
     reset,
@@ -30,11 +32,13 @@ export function RegisterForm({
   });
 
   const onSubmit = async (data: TRegisterSchema) => {
-    console.log("Register data:", data);
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    reset();
+    try {
+      await Register(data).unwrap();
+      reset();
+    } catch (err) {
+      console.error("register failed:", err);
+    }
   };
-
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -90,7 +94,7 @@ export function RegisterForm({
         </div>
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Creating..." : "Sign Up"}
+          {isLoading ? "Creating..." : "Sign Up"}
         </Button>
       </div>
 

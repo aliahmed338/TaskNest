@@ -1,5 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
+
 dotenv.config({ path: "./config/config.env" });
 
 import { connectToDatebase } from "./config/dbConnect";
@@ -16,6 +18,11 @@ connectToDatebase();
 const app = express();
 
 //middleare
+app.use(cors({
+  origin: "http://localhost:3001", 
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser());
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import { ThemeProvider } from "@/components/theme-provider";
+import ClientProviders from "@/components/provider/ClientProviders";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "TaskNest",
@@ -10,20 +10,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body className={``}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          disableTransitionOnChange
-        >
-          <Navbar />
-          <div className="w-6xl  m-auto"> {children}</div>
-        </ThemeProvider>
+      <body>
+        <Toaster />
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );

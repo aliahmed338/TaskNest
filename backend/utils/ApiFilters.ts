@@ -1,16 +1,25 @@
 import { ITask } from "../types/task";
+import {
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  format,
+} from "date-fns";
 
 interface FilterParams {
   category?: string;
   priority?: "low" | "medium" | "high";
   status?: "pending" | "in-progress" | "completed";
-  start?: Date;
+  date?: Date;
+  view?: "day" | "week" | "month";
   title?: string;
 }
 
 export class ApiFilter {
   tasks: ITask[];
   params: FilterParams;
+  grouped?: Record<string, ITask[]>;
 
   constructor(tasks: ITask[], params: FilterParams) {
     this.tasks = tasks;
@@ -18,6 +27,7 @@ export class ApiFilter {
   }
 
   filter() {
+    // فلترة عادية
     if (this.params.category) {
       this.tasks = this.tasks.filter(
         (task) => task.category === this.params.category
@@ -33,12 +43,46 @@ export class ApiFilter {
         (task) => task.status === this.params.status
       );
     }
-    if (this.params.start) {
-      const startDate = new Date(this.params.start).toISOString().split("T")[0];
+
+    // فلترة حسب اليوم / الاسبوع / الشهر
+    if (this.params.date) {
+      const date = new Date(this.params.date);
+      let startDate: Date;
+      let endDate: Date;
+
+      if (this.params.view === "week") {
+        startDate = startOfWeek(date, { weekStartsOn: 0 }); // 0 = الأحد / 1 = الاثنين
+        endDate = endOfWeek(date, { weekStartsOn: 0 });
+      } else if (this.params.view === "month") {
+        startDate = startOfMonth(date);
+        endDate = endOfMonth(date);
+      } else {
+        startDate = date;
+        endDate = date;
+      }
+      
+      // فلترة التاسكات حسب الرينج
       this.tasks = this.tasks.filter(
-        (task) =>
-          task.start && task.start.toISOString().split("T")[0] === startDate
-      );
+        (task) => task.start && task.start >= startDate && task.start <= endDate
+      );  
+
+      // Grouping
+      this.grouped = {};
+      let current = new Date(startDate);
+      while (current <= endDate) {
+        const key = format(current, "yyyy-MM-dd");
+        this.grouped[key] = [];
+        current.setDate(current.getDate() + 1);
+      }
+
+      this.tasks.forEach((task) => {
+        if (task.start) {
+          const taskDate = format(task.start, "yyyy-MM-dd");
+          if (this.grouped![taskDate]) {
+            this.grouped![taskDate].push(task);
+          }
+        }
+      });
     }
 
     return this;
@@ -46,7 +90,7 @@ export class ApiFilter {
 
   search() {
     if (this.params.title) {
-      const searchTtitle = (this.params.title as string).toLowerCase();
+      const searchTtitle = this.params.title.toLowerCase();
       this.tasks = this.tasks.filter((task) =>
         task.title.toLowerCase().includes(searchTtitle)
       );

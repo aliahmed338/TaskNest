@@ -36,7 +36,7 @@ export const loginUser = catchAsyncError(
       return next(new ErrorHandler("user not found", 404));
     }
 
-    const isPassword = user.comparePassword(password);
+    const isPassword = await user.comparePassword(password);
 
     if (!isPassword) {
       return next(new ErrorHandler("Invalid email & password", 401));
@@ -55,6 +55,19 @@ export const logOutUser = catchAsyncError(
 
     res.status(200).json({
       message: "Logged Out",
+    });
+  }
+);
+
+export const getUser = catchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const users = await User.findById(req.user.id);
+
+    res.status(200).json({
+      users,
     });
   }
 );

@@ -7,10 +7,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
+import { useLoginMutation } from "../../store/api/authApi";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(10, "wrong password.."),
+  password: z.string().min(8, "wrong password.."),
 });
 type TloginSchema = z.infer<typeof loginSchema>;
 
@@ -18,6 +21,8 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const router = useRouter();
+  const [Login, { isLoading }] = useLoginMutation();
   const {
     handleSubmit,
     reset,
@@ -28,10 +33,16 @@ export function LoginForm({
   });
 
   const onSubmit = async (data: TloginSchema) => {
-    console.log(data);
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    reset();
+    try {
+      await Login(data).unwrap();
+      reset();
+      toast.success("login successfully");
+      router.replace("/");
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Login failed");
+    }
   };
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -64,7 +75,7 @@ export function LoginForm({
           <Input {...register("password")} id="password" type="password" />
         </div>
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Creating..." : "Login"}
+          {isLoading ? "Creating..." : "Login"}
         </Button>
       </div>
       <div className="text-center text-sm">
