@@ -6,6 +6,10 @@ export interface ITask extends Document {
   title: string;
   description: string;
   category: string;
+  archived: {
+    type: Boolean;
+    default: false;
+  };
   priority: "low" | "medium" | "high";
   status: "pending" | "in-progress" | "completed";
   tags?: string[];
@@ -23,4 +27,8 @@ export interface ITask extends Document {
   end: Date;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface IdParam {
+  id: string;
 }

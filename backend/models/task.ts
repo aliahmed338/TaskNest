@@ -15,6 +15,10 @@ const taskSchema = new Schema<ITask>(
     description: {
       type: String,
     },
+    archived: {
+      type: Boolean,
+      default: false,
+    },
     category: {
       type: String,
       default: "General",
@@ -36,12 +40,6 @@ const taskSchema = new Schema<ITask>(
     end: {
       type: Date,
       required: true,
-      validate: {
-        validator: function (this: ITask, value: Date) {
-          return value > this.start;
-        },
-        message: "End date must be after start date",
-      },
     },
     links: {
       type: [String],
@@ -69,5 +67,13 @@ const taskSchema = new Schema<ITask>(
 
   { timestamps: true }
 );
+
+taskSchema.pre("findOneAndUpdate", function (next) {
+  const update: any = this.getUpdate();
+  if (update.start && update.end && update.end <= update.start) {
+    return next(new Error("End date must be after start date"));
+  }
+  next();
+});
 
 export const Task = mongoose.model<ITask>("Task", taskSchema);
