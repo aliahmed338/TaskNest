@@ -8,6 +8,10 @@ const noteSchema = new Schema<INote>(
       ref: "User",
       required: true,
     },
+    archived: {
+      type: Boolean,
+      default: false,
+    },
     title: {
       type: String,
       required: [true, "Note must have a title"],
@@ -15,10 +19,6 @@ const noteSchema = new Schema<INote>(
     content: {
       type: String,
       required: [true, "Note must have content"],
-    },
-    category: {
-      type: String,
-      default: "General",
     },
     date: {
       type: String,
