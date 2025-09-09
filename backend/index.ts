@@ -6,6 +6,7 @@ import { connectToDatebase } from "./config/dbConnect";
 import errorMiddleware from "./middleware/errorHandler";
 import userRoutes from "./routes/userRoutes";
 import taskRoutes from "./routes/taskRoutes";
+import noteRoutes from "./routes/noteRoutes";
 
 import cookieParser from "cookie-parser";
 
@@ -21,6 +22,7 @@ app.use(cookieParser());
 // routes
 app.use("/api/v1", userRoutes);
 app.use("/api/v1", taskRoutes);
+app.use("/api/v1", noteRoutes);
 
 //Error middleare
 app.use(errorMiddleware);
