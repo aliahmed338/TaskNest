@@ -6,10 +6,7 @@ export interface ITask extends Document {
   title: string;
   description: string;
   category: string;
-  archived: {
-    type: Boolean;
-    default: false;
-  };
+  archived: boolean;
   priority: "low" | "medium" | "high";
   status: "pending" | "in-progress" | "completed";
   tags?: string[];
